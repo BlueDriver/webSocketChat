@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>司机聊天室</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="./css/aui.css"/>
+    <style type="text/css">
+        input[type="text"] {
+            border-bottom: 1px solid rgba(0, 0, 0, .2);
+            border-radius: 5px;
+            height: 32px;
+            padding: 0px 4px;
+        }
+
+        input[type="text"]:focus {
+            border-bottom: 1px solid #00bcd4;
+        }
+
+        .fade-enter-active, .fade-leave-active {
+            /*transition: opacity .8s;*/
+            animation: ani .4s ease-in;
+            -webkit-animation: ani .4s ease-in;
+        }
+
+        /*.fade-enter, .fade-leave-to{
+          opacity: 0;
+          transform: translateX(-30px);
+        }*/
+        @keyframes ani {
+            0% {
+                transform: translateY(50px);
+                opacity: .5;
+            }
+            100% {
+                transform: translateY(0px);
+                opacity: 1;
+            }
+        }
+
+        @-webkit-keyframes ani {
+            0% {
+                -webkit-transform: translateY(50px);
+                opacity: .5;
+            }
+            100% {
+                -webkit-transform: translateY(0px);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="text" style="margin-top: 50%; text-align: center;"><h1>Loading...</h1></div>
+<div id="app" style="display: none;">
+    <div style="position: fixed; top: 10px; right: 10px; display: inline-block; background:  linear-gradient(-30deg,#56c5ff,#2673ec); border-radius: 10px; color: #fff; padding: 0 10px; z-index: 998;">
+        车内：{{online}}人
+    </div>
+    <section class="aui-chat">
+        <div class="aui-chat-header">{{start_time}}</div>
+        <div class="aui-chat-item aui-chat-left">
+            <div class="aui-chat-media">
+                <img src="./head/police.jpg"/>
+            </div>
+            <div class="aui-chat-inner">
+                <div class="aui-chat-name">小小&nbsp;<span class="aui-label aui-label-danger">交通警察</span></div>
+                <div class="aui-chat-content">
+                    <div class="aui-chat-arrow"></div>
+                    各位驾驶员朋友，请自觉维护秩序，遵守交通规则，不要乱超车哦！
+                </div>
+                <!-- <div class="aui-chat-status">
+                    <i class="aui-iconfont aui-icon-info aui-text-danger"></i>
+                </div> -->
+            </div>
+        </div>
+        <transition-group name="fade" tag="div">
+            <div v-for="item in msg" :key="item">
+                <div v-if="item.isSelf" class="aui-chat-item aui-chat-right">
+                    <div class="aui-chat-media">
+                        <img src="./head/me.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name"><span
+                                class="aui-label aui-label-info  aui-label-outlined">新手上路</span>&nbsp;我
+                        </div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                        </div>
+                        <!-- <div class="aui-chat-status">
+                            <i class="aui-iconfont aui-icon-info aui-text-danger"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div v-else-if="item.who==-1" style="text-align: center;">
+                    <div class="aui-chat-header"
+                         style="background: linear-gradient(-60deg, #ccc, #aaa); width: auto; display: inline-block; padding: 0 10px; border-radius: 10px; color: #f8f8f8;">
+                        {{item.msg}}
+                    </div>
+                </div>
+                <div v-else-if="item.who==0" class="aui-chat-item aui-chat-left" :key="item.index">
+                    <div class="aui-chat-media">
+                        <img src="./head/head0.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">萌萌&nbsp;<span class="aui-label aui-label-warning">萌萌哒车长</span></div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                            <!-- <img src="./head/head1.jpg" /> -->
+                        </div>
+                        <!-- <div class="aui-chat-status aui-chat-status-refresh">
+                            <i class="aui-iconfont aui-icon-correct aui-text-success"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div v-else-if="item.who==1" class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media">
+                        <img src="./head/head1.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">宝宝&nbsp;<span class="aui-label aui-label-info">副驾20年</span></div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                            <!-- <img src="./head/head1.jpg" /> -->
+                        </div>
+                        <!-- <div class="aui-chat-status aui-chat-status-refresh">
+                            <i class="aui-iconfont aui-icon-correct aui-text-success"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div v-else-if="item.who==2" class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media">
+                        <img src="./head/head2.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">明明&nbsp;<span class="aui-label aui-label-info aui-label-outlined">新手上路</span>
+                        </div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                            <!-- <img src="./head/head1.jpg" /> -->
+                        </div>
+                        <!-- <div class="aui-chat-status aui-chat-status-refresh">
+                            <i class="aui-iconfont aui-icon-correct aui-text-success"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div v-else-if="item.who==3" class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media">
+                        <img src="./head/head3.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">薇薇&nbsp;<span class="aui-label aui-label-info  aui-label-outlined">新手上路</span>
+                        </div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                            <!-- <img src="./head/head1.jpg" /> -->
+                        </div>
+                        <!-- <div class="aui-chat-status aui-chat-status-refresh">
+                            <i class="aui-iconfont aui-icon-correct aui-text-success"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div v-else-if="item.who==4" class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media">
+                        <img src="./head/head4.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">姗姗&nbsp;<span class="aui-label aui-label-danger aui-label-outlined">进阶小司机</span>
+                        </div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                            <!-- <img src="./head/head1.jpg" /> -->
+                        </div>
+                        <!-- <div class="aui-chat-status aui-chat-status-refresh">
+                            <i class="aui-iconfont aui-icon-correct aui-text-success"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div v-else-if="item.who==5" class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media">
+                        <img src="./head/head5.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">波波&nbsp;<span class="aui-label aui-label-info">专业老司机</span></div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                            <!-- <img src="./head/head1.jpg" /> -->
+                        </div>
+                        <!-- <div class="aui-chat-status aui-chat-status-refresh">
+                            <i class="aui-iconfont aui-icon-correct aui-text-success"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div v-else-if="item.who==6" class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media">
+                        <img src="./head/head6.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">霸霸&nbsp;<span class="aui-label aui-label-info">秋名山第二</span></div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                            <!-- <img src="./head/head1.jpg" /> -->
+                        </div>
+                        <!-- <div class="aui-chat-status aui-chat-status-refresh">
+                            <i class="aui-iconfont aui-icon-correct aui-text-success"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div v-else-if="item.who==7" class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media">
+                        <img src="./head/head7.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">娜娜&nbsp;<span class="aui-label aui-label-info">热心女司机</span></div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                            <!-- <img src="./head/head1.jpg" /> -->
+                        </div>
+                        <!-- <div class="aui-chat-status aui-chat-status-refresh">
+                            <i class="aui-iconfont aui-icon-correct aui-text-success"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div v-else-if="item.who==8" class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media">
+                        <img src="./head/head8.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">晴晴&nbsp;<span class="aui-label aui-label-info aui-label-outlined">新手上路</span>
+                        </div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                            <!-- <img src="./head/head1.jpg" /> -->
+                        </div>
+                        <!-- <div class="aui-chat-status aui-chat-status-refresh">
+                            <i class="aui-iconfont aui-icon-correct aui-text-success"></i>
+                        </div> -->
+                    </div>
+                </div>
+
+                <div v-else-if="item.who==110" class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media">
+                        <img src="./head/police.jpg"/>
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">小小&nbsp;<span class="aui-label aui-label-danger">交通警察</span></div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{item.msg}}
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <!-- end of v-for -->
+        </transition-group>
+        <!-- the space -->
+        <div class="aui-chat-item aui-chat-right" style="visibility:hidden;">
+            <div class="aui-chat-media">
+                <img src=""/>
+            </div>
+            -
+            <div class="aui-chat-inner">
+                <div class="aui-chat-content">
+                    <div class="aui-chat-arrow"></div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <section class="aui-grid"
+             style="background-color:#eee; position:fixed; bottom: 0px; border-top:1px solid #ccc; z-index: 999;">
+        <div class="aui-row" style="height: 40px; padding：4px 0px;">
+            <div v-if="!isLink" class="aul-col-xs-12" style="padding: 4px 10px;">
+                <p>
+                <div @click="ws_connect()" class="aui-btn aui-btn-success" style="width: 100%;">加入群聊</div>
+                </p>
+            </div>
+            <div v-else>
+                <div class="aui-col-xs-10" style="background-color: ; padding: 4px 2px;">
+                    <input style="text-align: center;" @click="jump()" @keydown.enter="sendMsg()" v-model="word"
+                           type="text" maxlength="128" placeholder="输入消息内容">
+                </div>
+                <div class="aui-col-xs-2" style="background-color: ; padding: 5px 0px;">
+                    <p>
+                    <div @click="sendMsg()" :class="{'aui-btn-info':status}" class="aui-btn">
+                        发送
+                    </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+</body>
+<script>
+    var ws = null;
+    var app = null;
+
+    function ws_close() {
+        if (ws != null) {
+            ws.close();
+            ws = null;
+            console.log("closed ok!");
+        }
+    }
+
+    window.onload = function () {
+
+        app = new Vue({
+            el: '#app',
+            data: {
+                isLink: false,//is linked to websocket
+                status: false,//can send msg
+                word: '',
+                online: 0,
+                msg: [
+                    // {isSelf: true, who: 0, msg: 1},
+                    // {isSelf: false, who: 1, msg: 2},
+                    // {isSelf: false, who: 2, msg: 3},
+                    // {isSelf: false, who: 3, msg: 4},
+                    // {isSelf: false, who: 4, msg: 5},
+                    // {isSelf: false, who: 5, msg: 6},
+                    // {isSelf: false, who: 0, msg: 7},
+                    // {isSelf: true, who: 5, msg: 8},
+                    // {"date":"2018-02-08 14:49:48","isSelf":true,"msg":"1"},
+                    // {"date":"2018-02-08 14:49:48","isSelf":false,"msg":"2"},
+                    // {"date":"2018-02-08 14:49:48","isSelf":true,"msg":"3"},
+                    // {"date":"2018-02-08 14:49:48","isSelf":false,"msg":"4"},
+                    // {"date":"2018-02-08 14:49:48","isSelf":true,"msg":"5"},
+                    // {"date":"2018-02-08 14:49:48","isSelf":true,"msg":"6"}
+                ]
+
+            },
+            computed: {
+                start_time: function () {
+                    var dt = new Date();
+                    return dt.toLocaleString();
+                }
+            },
+            watch: {
+                word: function () {
+                    //alert(this.word);
+                    if (this.word.trim() != '') {
+                        this.status = true;
+                    } else {
+                        this.status = false;
+                    }
+                }
+            },
+            methods: {
+                ws_connect: function () {
+                    if (!"WebSocket" in window) {
+                        // 浏览器不支持 WebSocket
+                        alert("您的设备不支持，无法使用！");
+                        return
+                    }
+                    var me = this
+                    //console.log(this)
+                    if (ws != null) {
+                        me.isLink = true
+                        console.log("Has connected!");
+                        return;
+                    }
+                    ws = new WebSocket("ws://localhost:8088/websocket?author=blue");
+                    //https://www.blue58.top/chat/
+                    //ws = new WebSocket("ws://i-code.top/dr/websocket?author=blue");
+                    ws.onopen = function () {
+                        // Web Socket 已连接上
+                        console.log("connected ok!")
+                        me.isLink = true
+                    };
+
+                    ws.onmessage = function (evt) {
+                        //接收到数据
+                        var res = JSON.parse(evt.data)
+                        console.log(evt.data)
+                        console.log("receive: " + res);
+                        me.msg.push(res)
+                        app.online = res.online
+                        setTimeout(me.jump, 50)
+                        //me.msg.push({date:received_msg.date,isSelf:received_msg.isSelf,msg:received_msg.msg})
+                        //me.msg.push({date:received_msg.date, isSelf: received_msg.isSelf, msg: received_msg.msg})
+                        //alert("数据已接收...");
+                    };
+                    ws.onclose = function () {
+                        // 关闭 websocket
+                        me.isLink = false
+                        alert("连接已断开！")
+                        //history.go(0);
+                        //console.log("连接已关闭...");
+                    };
+                },
+                jump: function () {
+                    //滚动条滚动到最底部
+                    window.scrollTo(0, document.body.scrollHeight + 200);
+                },
+                ws_close: function () {
+                    if (ws != null) {
+                        ws.close();
+                        ws = null;
+                        console.log("closed ok!");
+                    }
+                },
+                sendMsg: function () {
+                    //发送消息
+                    var me = this
+                    if (ws != null) {
+                        var text = this.word.trim()
+                        if (text.length > 0 && this.status) {
+                            console.log('send : ' + text)
+                            try {
+                                ws.send(text);
+                                //var p = {name:'qq',age:12}
+                                //ws.send(JSON.stringify(p))
+                            } catch (e) {
+                                this.isLink = false
+                                this.ws_close()
+                            }
+                            this.status = false;
+                            this.word = ''
+                        }
+                        else {
+                            this.status = false;
+                            console.log("content is empty")
+                        }
+
+                    } else {
+                        alert("连接已断开！")
+                        me.isLink = false
+                        history.go(0)
+                    }
+                }
+
+            }
+        })
+
+        //页面打开时建立连接
+        if ("WebSocket" in window) {
+            console.log("您的浏览器支持 WebSocket!");
+            try {
+                ws = new WebSocket("ws://localhost:8088/websocket?author=blue");
+            }catch(e){
+                alert(e)
+            }
+            ws.onopen = function () {
+                // Web Socket 已连接上
+                console.log("connected ok!")
+            };
+            ws.onmessage = function (evt) {
+                //接收到数据
+                var res = JSON.parse(evt.data)
+                console.log(evt.data)
+                app.msg.push(res)
+                app.online = res.online
+                setTimeout(app.jump, 50)
+                //me.msg.push({date:received_msg.date,isSelf:received_msg.isSelf,msg:received_msg.msg})
+                //me.msg.push({date:received_msg.date, isSelf: received_msg.isSelf, msg: received_msg.msg})
+                //alert("数据已接收...");
+            };
+            ws.onclose = function () {
+                // 关闭 websocket
+                alert("连接已关闭！")
+                app.isLink = false
+                console.log("onclose in onload 连接已关闭...");
+                //history.go(0)
+            };
+            document.getElementById("text").style.display = "none"
+            document.getElementById("app").style.display = "block"
+
+        } else {
+            // 浏览器不支持 WebSocket
+            alert("您的设备不支持，无法使用！");
+        }
+    }
+</script>
+</html>
